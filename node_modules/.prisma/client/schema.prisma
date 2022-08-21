@@ -1,0 +1,67 @@
+  generator client {
+  provider = "prisma-client-js"
+}
+
+  datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// criar uma migration: yarn prisma migrate dev
+model User{
+  id String @id @default(uuid())
+  name String 
+  email String @unique
+  user_privilege String @db.Char() @default("A")
+  password String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  @@map("user")
+  client Client[]
+  service Service[]
+  schedule Schedule[]
+}
+
+model Client{
+  id String @id @default(uuid())
+  name String 
+  email String @unique
+  description String 
+  district String
+  client_type String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now()) 
+  user User @relation(fields: [user_id], references: [id])
+  @@map("client")
+  user_id String
+  schedule Schedule[]
+}
+
+model Service{
+  id String @id @default(uuid())
+  description String 
+  price Decimal @db.Decimal
+  service_time DateTime? @db.Time()
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  user User @relation(fields: [user_id], references: [id])
+  @@map("service")
+  user_id String
+  schedule Schedule[]
+}
+
+model Schedule{
+  id String @id @default(uuid())
+  schedule_day DateTime @db.Date()
+  schedule_time DateTime @db.Time()
+  completion_time_service DateTime @db.Time()
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+  client Client @relation(fields: [client_id], references: [id])
+  service Service @relation(fields: [service_id], references: [id])
+  user User @relation(fields: [user_id], references: [id])
+  @@map("schedule")
+  client_id String
+  service_id String
+  user_id String
+}
